@@ -31,3 +31,5 @@ class Sensor_reader:
                 time.sleep(.5)
             except IOError:
                 print("Error")
+    def send_command(self, command):
+        self.sen_con_queue.put(command)
