@@ -1,6 +1,5 @@
 
-
-class Controlator:
+class Controller:
     def __init__(self,dron,cam_con_queue,sen_con_queue):
         self.dron = dron
         self.cam_con_queue = cam_con_queue

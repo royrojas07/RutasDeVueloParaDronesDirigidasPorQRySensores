@@ -2,7 +2,7 @@ from djitellopy import Tello
 from threading import Thread
 from time import sleep
 import queue
-from Controlator import *
+from Controller import *
 
 #dron = Tello()
 #dron.connect()
@@ -11,7 +11,7 @@ cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
 
 def main():
-    threads = [Thread( target=init_controlator, args=()),
+    threads = [Thread( target=init_Controller, args=()),
                Thread( target=init_camera, args=()),
                Thread( target=init_sensor, args=())]
 
@@ -19,9 +19,9 @@ def main():
         thread.start()
     
 
-def init_controlator():
-    controlator = Controlator(dron,cam_con_queue,sen_con_queue)
-    controlator.start_processing()
+def init_Controller():
+    controller = Controller(dron,cam_con_queue,sen_con_queue)
+    controller.start_processing()
 
 def init_camera():
     print("hilo de camara")
