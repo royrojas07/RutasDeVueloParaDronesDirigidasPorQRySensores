@@ -29,7 +29,7 @@ class ImageCaption:
             if( valid ):
                 self.controller_comm.put( instruction )
             else:
-                self.controller_comm.put( "Error: no QR found" )
+                self.controller_comm.put( "ERROR: no QR found" )
                 exit_thread = True
             sleep(1)
     
