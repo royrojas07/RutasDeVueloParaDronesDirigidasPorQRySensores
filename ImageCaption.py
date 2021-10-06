@@ -19,19 +19,24 @@ class ImageCaption:
     
     def routine( self ):
         exit_thread = False
-        while not exit_thread:
+        end = False
+        while not exit_thread or not end:
             print("[INFO] ImageCaption: Waiting message from Controller")
             # espera pasiva de mensaje de controlador
             self.controller_comm.get()
             print("[INFO] ImageCaption: Message taken from Controller")
             instruction = self.search_qr()
-            valid = self.check_instruction( instruction )
-            if( valid ):
+            value = self.check_instruction( instruction )
+            if( value == 1 ):
                 self.controller_comm.put( instruction )
-            else:
+            elif( value == 0 ):
                 self.controller_comm.put( "ERROR: no QR found" )
                 exit_thread = True
+            else:
+                self.controller_comm.put( instruction.split( ",END" ) )
+                end = True
             sleep(1)
+        self.controller_comm.put( "END" )
     
     def search_qr( self ):
         decoded_instruction = None
@@ -97,17 +102,17 @@ class ImageCaption:
 
     def check_instruction( self, instruction ):
         if( instruction == None ):
-            return False
+            return 0
         elif( re.search( "^((([RLFUB]|R(R|L)):[2-9]\d+,)+(([RLFUB]|R(R|L)):[2-9]\d+))$",
             instruction ) ):
-                return True
+                return 1
         elif( re.search( "^(([RLFUB]|R(R|L)):[2-9]\d+)$",
             instruction ) ):
-                return True
+                return 1
         elif( re.search( "^((([RLFUB]|R(R|L)):[2-9]\d+,)+END)$",
             instruction ) ):
-                return True
-        return False
+                return 2
+        return 0
     
     def move( self, direction, cm ):
         print("[INFO] ImageCaption: Tello is moving")
