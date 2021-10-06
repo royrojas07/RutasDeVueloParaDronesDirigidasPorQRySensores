@@ -33,7 +33,7 @@ class ImageCaption:
                 self.controller_comm.put( "ERROR: no QR found" )
                 exit_thread = True
             else:
-                self.controller_comm.put( instruction.split( ",END" ) )
+                self.controller_comm.put( instruction.split( ",END" )[0] )
                 end = True
             sleep(1)
         self.controller_comm.put( "END" )
