@@ -1,3 +1,5 @@
+from threading import Thread
+from time import sleep
 
 class Controller:
     def __init__(self,dron,cam_con_queue,sen_con_queue):
@@ -10,20 +12,14 @@ class Controller:
                              'RR': self.dron.rotate_clockwise, 'RL': self.dron.rotate_counter_clockwise}
         self.src_thread = Thread( target=self.start_processing, args=() )
 
-     def thread_init( self ):
+    def thread_init( self ):
         self.src_thread.start()
-    
-    def start_processing(self):
-        while not self.last_QR:
-            instruction = self.cam_con_queue.get()
-            send_commands(instruction)
-        instruction = self.sen_con_queue.get()
-        send_commands(instruction)
 
     def send_commands(self,QRcode):
+        print("[INFO] Controller: Executing" + QRcode)
         if(QRcode == "END"):
             last_QR = True 
-            self.sen_con_queue("Despierte")
+            self.sen_con_queue.put("Wake up")
         else:
             actions = QRcode.split(',')
             if(action[0] == "ERROR"):
@@ -32,6 +28,20 @@ class Controller:
                 print(actions)
                 for action in actions:
                     actions_and_numbers = action.split(':')
-                    print(actions_and_numbers)
-                    print("executing " + actions_and_numbers[0])
                     self.commands_dic[actions_and_numbers[0]](int(actions_and_numbers[1]))
+    
+    def start_processing(self):
+        self.dron.takeoff()
+        self.cam_con_queue.put("Start")
+        sleep(1)
+        while not self.last_QR:
+            print("[INFO] Controller: Waiting message from ImageCaption")
+            instruction = self.cam_con_queue.get()
+            print("[INFO] Controller: Message taken from ImageCaption")
+            self.send_commands(instruction)
+            self.cam_con_queue.put("Next")
+        #instruction = self.sen_con_queue.get()
+        #send_commands(instruction)
+        self.dron.land()
+
+    
