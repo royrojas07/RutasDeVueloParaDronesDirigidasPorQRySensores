@@ -21,11 +21,17 @@ class Controller:
         send_commands(instruction)
 
     def send_commands(self,QRcode):
-        #Recordar agregar aqui que hacer con el ERROR, y con el END
-        actions = QRcode.split(',')
-        print(actions)
-        for action in actions:
-            actions_and_numbers = action.split(':')
-            print(actions_and_numbers)
-            print("executing " + actions_and_numbers[0])
-            self.commands_dic[actions_and_numbers[0]](int(actions_and_numbers[1]))
+        if(QRcode == "END"):
+            last_QR = True 
+            self.sen_con_queue("Despierte")
+        else:
+            actions = QRcode.split(',')
+            if(action[0] == "ERROR"):
+                print(action[1])
+            else:
+                print(actions)
+                for action in actions:
+                    actions_and_numbers = action.split(':')
+                    print(actions_and_numbers)
+                    print("executing " + actions_and_numbers[0])
+                    self.commands_dic[actions_and_numbers[0]](int(actions_and_numbers[1]))
