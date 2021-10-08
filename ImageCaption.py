@@ -20,7 +20,7 @@ class ImageCaption:
     def routine( self ):
         exit_thread = False
         end = False
-        while not exit_thread or not end:
+        while not exit_thread and not end:
             print("[INFO] ImageCaption: Waiting message from Controller")
             # espera pasiva de mensaje de controlador
             self.controller_comm.get()
@@ -35,7 +35,8 @@ class ImageCaption:
             else:
                 self.controller_comm.put( instruction.split( ",END" )[0] )
                 end = True
-            sleep(1)
+            sleep(1) # para esperar a que el controlador agarre el mensaje primero
+        self.controller_comm.get() # esperar a que se completen las ultimas acciones antes del END
         self.controller_comm.put( "END" )
     
     def search_qr( self ):

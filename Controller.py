@@ -22,8 +22,8 @@ class Controller:
             self.sen_con_queue.put("Wake up")
         else:
             actions = QRcode.split(',')
-            if(action[0] == "ERROR"):
-                print(action[1])
+            if(actions[0] == "ERROR"):
+                print(actions[1])
             else:
                 print(actions)
                 for action in actions:

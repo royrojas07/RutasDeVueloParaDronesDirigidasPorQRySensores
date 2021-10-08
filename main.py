@@ -10,8 +10,8 @@ dron = Tello()
 dron.connect()
 cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
-max_height = sys.argv[1]
-
+max_height = int(sys.argv[1])
+#print( dron.get_battery() )
 def main():
     threads = [Thread( target=init_Controller, args=()),
                Thread( target=init_camera, args=()),
