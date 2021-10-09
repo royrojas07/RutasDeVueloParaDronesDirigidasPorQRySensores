@@ -16,9 +16,9 @@ class Sensor_reader:
     
     def guide_drone(self):
         distance = ultrasonicRead(ULTRASONIC_RANGER)
-        if(distance < self.landing_distance):
-            send_command(self,20)
-    
+        if(distance <= self.landing_distance):
+            send_command(self,self.landing_distance - distance)
+
     def start():
         ultrasonic_detected = False
         sound_detected = False
