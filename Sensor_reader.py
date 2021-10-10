@@ -32,8 +32,8 @@ class Sensor_reader:
                 if distance <= 20 and loudness >= 150:
                     digitalWrite(ULTRASONIC_RANGER_LED,1)
                     digitalWrite(SOUND_SENSOR_LED,1)
-                    ultrasonic_detected = False
-                    sound_detected = False
+                    ultrasonic_detected = True
+                    sound_detected = True
                 elif distance <= 20 and loudness < 150:
                     digitalWrite(ULTRASONIC_RANGER_LED,1)
                     digitalWrite(SOUND_SENSOR_LED,0)
