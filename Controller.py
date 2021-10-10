@@ -40,6 +40,7 @@ class Controller:
             print("[INFO] Controller: Message taken from ImageCaption")
             self.send_commands(instruction)
             self.cam_con_queue.put("Next")
+            sleep(1)
         #instruction = self.sen_con_queue.get()
         #send_commands(instruction)
         self.dron.land()
