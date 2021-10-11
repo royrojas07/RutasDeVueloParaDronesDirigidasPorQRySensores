@@ -13,7 +13,7 @@ exit_event = threading.Event()
 cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
 max_height = int(sys.argv[1])
-#print( dron.get_battery() )
+print( dron.get_battery() )
 
 def handler(signum, frame):
     print("[ABORT] Landing the Tello")

@@ -18,7 +18,7 @@ class Controller:
     def send_commands(self,QRcode):
         print("[INFO] Controller: Executing" + QRcode)
         if(QRcode == "END"):
-            last_QR = True 
+            self.last_QR = True 
             self.sen_con_queue.put("Wake up")
         else:
             actions = QRcode.split(',')

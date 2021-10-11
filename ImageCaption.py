@@ -20,21 +20,20 @@ class ImageCaption:
     def routine( self ):
         exit_thread = False
         end = False
+        no_qr_found = False
         while not exit_thread and not end:
             print("[INFO] ImageCaption: Waiting message from Controller")
             # espera pasiva de mensaje de controlador
             self.controller_comm.get()
             print("[INFO] ImageCaption: Message taken from Controller")
-            instruction = self.search_qr()
-            value = self.check_instruction( instruction )
-            if( value == 1 ):
-                self.controller_comm.put( instruction )
-            elif( value == 0 ):
-                self.controller_comm.put( "ERROR: no QR found" )
-                exit_thread = True
-            else:
-                self.controller_comm.put( instruction.split( ",END" )[0] )
-                end = True
+            while not no_qr_found:
+                instruction = self.search_qr()
+                value = self.check_instruction( instruction )
+                if( value == 1 ):
+                    self.controller_comm.put( instruction )
+                else:
+                    self.controller_comm.put( instruction.split( ",END" )[0] )
+                    end = True
             sleep(1) # para esperar a que el controlador agarre el mensaje primero
         self.controller_comm.get() # esperar a que se completen las ultimas acciones antes del END
         self.controller_comm.put( "END" )
