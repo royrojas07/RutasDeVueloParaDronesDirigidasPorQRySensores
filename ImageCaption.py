@@ -4,6 +4,7 @@ import cv2
 from time import sleep
 from pyzbar.pyzbar import decode
 import re
+from datetime import datetime
 
 class ImageCaption:
     def __init__( self, tello, queue, max_height ):
@@ -45,6 +46,9 @@ class ImageCaption:
         # se toma la foto
         frame_reader = self.tello.get_frame_read()
         img = frame_reader.frame
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        cv2.imwrite("picture " + current_time + ".jpg", img)
         # decode qr image
         dec_img = decode( img )
         if( len(dec_img) != 0 ):
@@ -70,6 +74,9 @@ class ImageCaption:
             # se busca QR mientras el dron se mueve
             while t.is_alive():
                 img = frame_reader.frame
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                cv2.imwrite("picture " + current_time + ".jpg", img)
                 dec_img = decode( img )
                 if( len(dec_img) != 0 ):
                     decoded_instruction = dec_img[0].data.decode( 'utf8' )
@@ -91,6 +98,9 @@ class ImageCaption:
             # se busca QR mientras el dron se mueve
             while t.is_alive():
                 img = frame_reader.frame
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                cv2.imwrite("picture " + current_time + ".jpg", img)
                 dec_img = decode( img )
                 if( len(dec_img) != 0 ):
                     decoded_instruction = dec_img[0].data.decode( 'utf8' )

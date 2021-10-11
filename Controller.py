@@ -22,12 +22,12 @@ class Controller:
             self.sen_con_queue.put("Wake up")
         else:
             actions = QRcode.split(',')
-            if(actions[0] == "ERROR"):
-                print(actions[1])
-            else:
-                print(actions)
-                for action in actions:
-                    actions_and_numbers = action.split(':')
+            print(actions)
+            for action in actions:
+                actions_and_numbers = action.split(':')
+                if(actions[0] == "ERROR"):
+                    print("[ERROR] Controller: Error detected from ImageCaption " + actions[1])
+                else:
                     self.commands_dic[actions_and_numbers[0]](int(actions_and_numbers[1]))
     
     def start_processing(self):
