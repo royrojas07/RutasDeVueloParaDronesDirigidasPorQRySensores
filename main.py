@@ -29,6 +29,7 @@ def main():
 
     for thread in threads:
         thread.start()
+        thread.join()
     
     signal.signal(2, handler)
 
