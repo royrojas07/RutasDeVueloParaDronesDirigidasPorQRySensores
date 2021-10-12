@@ -4,6 +4,7 @@ import cv2
 from time import sleep
 from pyzbar.pyzbar import decode
 import re
+from datetime import datetime
 
 class ImageCaption:
     def __init__( self, tello, queue, max_height ):
@@ -20,21 +21,20 @@ class ImageCaption:
     def routine( self ):
         exit_thread = False
         end = False
+        no_qr_found = False
         while not exit_thread and not end:
             print("[INFO] ImageCaption: Waiting message from Controller")
             # espera pasiva de mensaje de controlador
             self.controller_comm.get()
             print("[INFO] ImageCaption: Message taken from Controller")
-            instruction = self.search_qr()
-            value = self.check_instruction( instruction )
-            if( value == 1 ):
-                self.controller_comm.put( instruction )
-            elif( value == 0 ):
-                self.controller_comm.put( "ERROR: no QR found" )
-                exit_thread = True
-            else:
-                self.controller_comm.put( instruction.split( ",END" )[0] )
-                end = True
+            while not no_qr_found:
+                instruction = self.search_qr()
+                value = self.check_instruction( instruction )
+                if( value == 1 ):
+                    self.controller_comm.put( instruction )
+                else:
+                    self.controller_comm.put( instruction.split( ",END" )[0] )
+                    end = True
             sleep(1) # para esperar a que el controlador agarre el mensaje primero
         self.controller_comm.get() # esperar a que se completen las ultimas acciones antes del END
         self.controller_comm.put( "END" )
@@ -46,6 +46,9 @@ class ImageCaption:
         # se toma la foto
         frame_reader = self.tello.get_frame_read()
         img = frame_reader.frame
+        now = datetime.now()
+        current_time = now.strftime("%H:%M:%S")
+        cv2.imwrite("picture " + current_time + ".jpg", img)
         # decode qr image
         dec_img = decode( img )
         if( len(dec_img) != 0 ):
@@ -71,6 +74,9 @@ class ImageCaption:
             # se busca QR mientras el dron se mueve
             while t.is_alive():
                 img = frame_reader.frame
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                cv2.imwrite("picture " + current_time + ".jpg", img)
                 dec_img = decode( img )
                 if( len(dec_img) != 0 ):
                     decoded_instruction = dec_img[0].data.decode( 'utf8' )
@@ -92,6 +98,9 @@ class ImageCaption:
             # se busca QR mientras el dron se mueve
             while t.is_alive():
                 img = frame_reader.frame
+                now = datetime.now()
+                current_time = now.strftime("%H:%M:%S")
+                cv2.imwrite("picture " + current_time + ".jpg", img)
                 dec_img = decode( img )
                 if( len(dec_img) != 0 ):
                     decoded_instruction = dec_img[0].data.decode( 'utf8' )
