@@ -1,6 +1,8 @@
 from grovepi import *
 import grovepi
 import time
+import numpy as np
+
 ULTRASONIC_RANGER = 8
 SOUND_SENSOR = 0
 ULTRASONIC_RANGER_LED = 4
@@ -10,16 +12,22 @@ class Sensor_reader:
     def __init__(self,sen_con_queue,landing_distance):
         self.sen_con_queue = sen_con_queue
         self.landing_distance = landing_distance
+
+    def thread_init(self):
+        self.src_thread.start()
     
     def send_command(self, command):
         self.sen_con_queue.put(command)
     
     def guide_drone(self):
-        distance = ultrasonicRead(ULTRASONIC_RANGER)
-        if(distance <= self.landing_distance):
-            send_command(self,self.landing_distance - distance)
+        distances = []
+        for i in range(6):
+            distances.append(ultrasonicRead(ULTRASONIC_RANGER))
+        mean_distance = np.mean(distances)
+        if(distance <= self.landing_distance and self.sen_con_queue.get() == "END" or self.sen_con_queue.get() == "NEXT"):
+            self.send_command(self, "F " + self.landing_distance - mean_distance)
 
-    def start():
+    def start(self):
         ultrasonic_detected = False
         sound_detected = False
         drone_not_detected = True
@@ -49,4 +57,4 @@ class Sensor_reader:
             if(ultrasonic_detected and sound_detected):
                 print("Drone detected")
                 drone_not_detected = False
-        guide_drone(self)
+        self.guide_drone(self)

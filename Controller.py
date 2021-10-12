@@ -7,6 +7,7 @@ class Controller:
         self.cam_con_queue = cam_con_queue
         self.sen_con_queue = sen_con_queue
         self.last_QR = False
+        self.land = False
         self.commands_dic = {'R': self.dron.move_right, 'L': self.dron.move_left, 'F' : self.dron.move_forward, 
                              'B' : self.dron.move_back, 'U': self.dron.move_up, 'D': self.dron.move_down, 
                              'RR': self.dron.rotate_clockwise, 'RL': self.dron.rotate_counter_clockwise}
@@ -43,6 +44,29 @@ class Controller:
             sleep(1)
         #instruction = self.sen_con_queue.get()
         #send_commands(instruction)
+        #self.process_sen(self)
         self.dron.land()
 
-    
+    def process_sen(self):
+        while not self.land:
+            print("[INFO] Controller: Waiting for message from SensorReader")
+            instruction = self.sen_con_queue.get()
+            print("[INFO] Controller: Message received from SensorReader")
+            self.send_commands_sen(instruction)
+            self.sen_con_queue.put("Next")
+            sleep(1)
+
+    def send_commands_sen(self,instruction):
+        print("[INFO] Controller: Executing Sensor_reader" + instruction)
+        if(instruction == "LAND"):
+            land = True
+        else:
+            actions = instruction.split('')
+            if(actions[0] == "SENSOR ERROR"):
+                print(actions[1])
+            else:
+                print(actions)
+                for action in actions:
+                    actions_and_numbers = action.split(':')
+                    self.commands_dic[actions_and_numbers[0]](int(actions_and_numbers[1]))
+

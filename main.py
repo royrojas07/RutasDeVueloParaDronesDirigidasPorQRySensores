@@ -6,6 +6,7 @@ import sys
 import signal
 from Controller import *
 from ImageCaption import *
+from Sensor_reader import *
 
 dron = Tello()
 dron.connect()
@@ -23,9 +24,10 @@ def handler(signum, frame):
 
 
 def main():
+    landing_distance = input("A cuanta distancia en metros está el punto de aterrizaje en frente del sensor ultrasónico?")
     threads = [Thread( target=init_Controller, args=()),
                Thread( target=init_camera, args=()),
-               Thread( target=init_sensor, args=())]
+               Thread( target=init_sensor, args=(landing_distance))]
 
     for thread in threads:
         thread.start()
@@ -40,7 +42,9 @@ def init_camera():
     imageCaption = ImageCaption(dron,cam_con_queue,max_height)
     imageCaption.thread_init()
 
-def init_sensor():
+def init_sensor(landing_distance):
+    sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance)
+    sensorReader.thread_init()
     print("hilo de sensor")
 
 if __name__ == '__main__':
