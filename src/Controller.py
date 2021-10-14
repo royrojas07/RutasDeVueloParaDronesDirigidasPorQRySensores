@@ -2,12 +2,13 @@ from threading import Thread
 from time import sleep
 
 class Controller:
-    def __init__(self,dron,cam_con_queue,sen_con_queue):
+    def __init__(self,dron,cam_con_queue,sen_con_queue,log):
         self.dron = dron
         self.cam_con_queue = cam_con_queue
         self.sen_con_queue = sen_con_queue
         self.last_QR = False
         self.land = False
+        self.log = log
         self.commands_dic = {'R': self.dron.move_right, 'L': self.dron.move_left, 'F' : self.dron.move_forward, 
                              'B' : self.dron.move_back, 'U': self.dron.move_up, 'D': self.dron.move_down, 
                              'RR': self.dron.rotate_clockwise, 'RL': self.dron.rotate_counter_clockwise}

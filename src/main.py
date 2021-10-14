@@ -7,6 +7,7 @@ import signal
 from Controller import *
 from ImageCaption import *
 from Sensor_reader import *
+from Log import *
 
 dron = Tello()
 dron.connect()
@@ -15,11 +16,14 @@ cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
 max_height = int(sys.argv[1])
 print( dron.get_battery() )
+log = Log()
+log.print("INFO","Main","The program started")
 
 def handler(signum, frame):
     print("[ABORT] Landing the Tello")
     dron.land()
     exit_event.set() # para que mate los threads
+    log.close_file()
     exit()
 
 
@@ -34,9 +38,10 @@ def main():
         thread.join()
     
     signal.signal(2, handler)
+    log.close_file()
 
 def init_Controller():
-    controller = Controller(dron,cam_con_queue,sen_con_queue)
+    controller = Controller(dron,cam_con_queue,sen_con_queue,log)
     controller.thread_init()
 
 def init_camera():
