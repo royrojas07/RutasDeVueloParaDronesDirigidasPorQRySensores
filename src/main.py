@@ -45,7 +45,7 @@ def init_Controller():
     controller.thread_init()
 
 def init_camera():
-    imageCaption = ImageCaption(dron,cam_con_queue,max_height)
+    imageCaption = ImageCaption(dron,cam_con_queue,max_height,log)
     imageCaption.thread_init()
 
 def init_sensor(landing_distance):
