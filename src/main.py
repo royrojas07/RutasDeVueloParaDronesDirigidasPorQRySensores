@@ -38,7 +38,7 @@ def main():
         thread.join()
     
     signal.signal(2, handler)
-    log.close_file()
+    #log.close_file()
 
 def init_Controller():
     controller = Controller(dron,cam_con_queue,sen_con_queue,log)

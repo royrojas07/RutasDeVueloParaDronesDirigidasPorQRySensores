@@ -18,7 +18,8 @@ class Controller:
         self.src_thread.start()
 
     def send_commands(self,QRcode):
-        print("[INFO] Controller: Executing" + QRcode)
+        print("[INFO] Controller: Executing " + QRcode)
+        self.log.print("INFO","Controller","Executing " + QRcode)
         if(QRcode == "END"):
             self.last_QR = True 
             self.sen_con_queue.put("Wake up")
@@ -29,6 +30,7 @@ class Controller:
                 actions_and_numbers = action.split(':')
                 if(actions[0] == "ERROR"):
                     print("[ERROR] Controller: Error detected from ImageCaption " + actions[1])
+                    self.log.print("ERROR","Controller", "Error detected from ImageCaption " + actions[1])
                 else:
                     self.commands_dic[actions_and_numbers[0]](int(actions_and_numbers[1]))
     
@@ -38,10 +40,13 @@ class Controller:
         sleep(1)
         while not self.last_QR:
             print("[INFO] Controller: Waiting message from ImageCaption")
+            self.log.print("INFO","Controller", "Waiting message from ImageCaption")
             instruction = self.cam_con_queue.get()
             print("[INFO] Controller: Message taken from ImageCaption")
+            self.log.print("INFO","Controller", "Message taken from ImageCaption")
             self.send_commands(instruction)
             self.cam_con_queue.put("Next")
+            self.log.print("INFO","Controller", "Requesting for the next instruction")
             sleep(1)
         #instruction = self.sen_con_queue.get()
         #send_commands(instruction)
