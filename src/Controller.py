@@ -50,10 +50,12 @@ class Controller:
             sleep(1)
         #instruction = self.sen_con_queue.get()
         #send_commands(instruction)
-        #self.process_sen(self)
-        self.dron.land()
+        self.process_sen(self)
+        #self.dron.land()
 
     def process_sen(self):
+        self.sen_con_queue.put("Start")
+        sleep(1)
         while not self.land:
             print("[INFO] Controller: Waiting for message from SensorReader")
             instruction = self.sen_con_queue.get()
@@ -61,14 +63,15 @@ class Controller:
             self.send_commands_sen(instruction)
             self.sen_con_queue.put("Next")
             sleep(1)
+        self.dron.land()
 
     def send_commands_sen(self,instruction):
         print("[INFO] Controller: Executing Sensor_reader" + instruction)
         if(instruction == "LAND"):
-            land = True
+            self.land = True
         else:
             actions = instruction.split('')
-            if(actions[0] == "SENSOR ERROR"):
+            if(actions[0] == "SENSOR" and actions[1] == "ERROR"):
                 print(actions[1])
             else:
                 print(actions)
