@@ -6,16 +6,17 @@ import sys
 import signal
 from Controller import *
 from ImageCaption import *
-from Sensor_reader import *
+#from Sensor_reader import *
 from Log import *
 
-#dron = Tello()
-#dron.connect()
+dron = Tello()
+dron.connect()
+dron.set_speed(20)
 exit_event = threading.Event()
 cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
 
-#print( dron.get_battery() )
+print( dron.get_battery() )
 log = Log()
 log.print("INFO","Main","The program started")
 
@@ -28,16 +29,18 @@ def handler(signum, frame):
 
 
 def main():
-    route_type = usage()
+    route_type, max_height = usage()
     if(route_type == 1):
         landing_distance = input("A cuanta distancia en metros está el punto de aterrizaje en frente del sensor ultrasónico?")
         threads = [Thread( target=init_Controller, args=()),
-                Thread( target=init_camera, args=()),
-                Thread( target=init_sensor, args=(landing_distance))]
-
-        for thread in threads:
-            thread.start()
-            thread.join()
+                Thread( target=init_camera, args=(max_height,)),
+                Thread( target=init_sensor, args=(landing_distance,))]
+        try:
+            for thread in threads:
+                thread.start()
+                thread.join()
+        except KeyboardInterrupt:
+            exit()
     else:
         pass
         #en este caso usaria el archivo separado por tabs
@@ -47,6 +50,7 @@ def main():
 
 def usage():
     route_type = 0
+    max_height = 0
     if len(sys.argv) == 3:
         if not (sys.argv[2].isnumeric()):
             print("Error - Invalid input in the number argument")
@@ -68,19 +72,19 @@ def usage():
         print("route type could be: QR or auto")
         print("number is max height in QR and which route in auto")
         exit
-    return route_type
+    return route_type, max_height
 
 def init_Controller():
     controller = Controller(dron,cam_con_queue,sen_con_queue,log)
     controller.thread_init()
 
-def init_camera():
+def init_camera(max_height):
     imageCaption = ImageCaption(dron,cam_con_queue,max_height,log)
     imageCaption.thread_init()
 
 def init_sensor(landing_distance):
-    sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance)
-    sensorReader.thread_init()
+    #sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance)
+    #sensorReader.thread_init()
     print("hilo de sensor")
 
 if __name__ == '__main__':

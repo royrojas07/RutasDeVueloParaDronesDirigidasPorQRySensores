@@ -4,7 +4,7 @@ class Log:
     def __init__(self):
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
-        self.file = open("../logs/" + current_time + ".txt","w+")
+        self.file = open("hola.txt","w+")
 
     def print(self, msg_type, module_name, msg):
         now = datetime.now()
