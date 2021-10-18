@@ -25,8 +25,22 @@ class Sensor_reader:
             distances.append(ultrasonicRead(ULTRASONIC_RANGER))
         mean_distance = np.mean(distances)
         if(distance <= self.landing_distance and self.sen_con_queue.get() == "END" or self.sen_con_queue.get() == "NEXT"):
-            self.send_command(self, "F " + self.landing_distance - mean_distance)
+            distance_forward = self.landing_distance - mean_distance
+            self.send_command("F:" + distance_forward)
+        else:
+            self.send_command("SENSOR ERROR")
 
+    def routine(self):
+        exit_thread = False
+        land = False
+        while not exit_thread and not land:
+            print("[INFO] SensorReader: Waiting message from Controller")
+            self.sen_con_queue.get()
+            print("[INFO] SensorReader: Message received from Controller")
+            self.start() #se trata de detectar el dron y cuando se detecta se guia
+            self.guide_drone()
+            self.land_drone() #falta implementar metodo
+    
     def start(self):
         ultrasonic_detected = False
         sound_detected = False
@@ -57,4 +71,4 @@ class Sensor_reader:
             if(ultrasonic_detected and sound_detected):
                 print("Drone detected")
                 drone_not_detected = False
-        self.guide_drone(self)
+
