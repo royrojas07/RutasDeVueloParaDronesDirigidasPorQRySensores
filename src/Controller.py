@@ -1,5 +1,6 @@
 from threading import Thread
 from time import sleep
+from playsound import playsound  
 
 class Controller:
     def __init__(self,dron,cam_con_queue,sen_con_queue,log):
@@ -45,6 +46,7 @@ class Controller:
             print("[INFO] Controller: Message taken from ImageCaption")
             self.log.print("INFO","Controller", "Message taken from ImageCaption")
             self.send_commands(instruction)
+            playsound('y2mate.com - sonido de notificacion kawai.mp3')
             self.cam_con_queue.put("Next")
             self.log.print("INFO","Controller", "Requesting for the next instruction")
             sleep(1)

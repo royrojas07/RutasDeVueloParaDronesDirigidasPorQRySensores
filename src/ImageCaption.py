@@ -35,9 +35,11 @@ class ImageCaption:
                 value = self.check_instruction( instruction )
                 if( value == 1 ):
                     self.controller_comm.put( instruction )
-                else:
+                elif(value == 2):
                     self.controller_comm.put( instruction.split( ",END" )[0] )
                     end = True
+                else:
+                    pass # leyo una instruccion no valida
             sleep(1) # para esperar a que el controlador agarre el mensaje primero
         self.controller_comm.get() # esperar a que se completen las ultimas acciones antes del END
         self.controller_comm.put( "END" )

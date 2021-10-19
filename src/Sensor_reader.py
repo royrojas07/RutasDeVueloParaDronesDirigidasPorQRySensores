@@ -1,5 +1,5 @@
-from grovepi import *
-import grovepi
+#from grovepi import *
+#import grovepi
 import time
 import numpy as np
 

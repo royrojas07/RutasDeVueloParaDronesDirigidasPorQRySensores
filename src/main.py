@@ -6,14 +6,15 @@ import sys
 import signal
 from Controller import *
 from ImageCaption import *
-from Sensor_reader import *
+#from Sensor_reader import *
 from Log import *
 
-#dron = Tello()
-#dron.connect()
+dron = Tello()
+dron.connect()
 exit_event = threading.Event()
 cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
+max_height = 100 #valor default, se reescribe en usage 
 
 #print( dron.get_battery() )
 log = Log()
@@ -21,9 +22,9 @@ log.print("INFO","Main","The program started")
 
 def handler(signum, frame):
     print("[ABORT] Landing the Tello")
-    dron.land()
     exit_event.set() # para que mate los threads
-    log.close_file()
+    dron.land()
+    #log.close_file()
     exit()
 
 
@@ -79,8 +80,8 @@ def init_camera():
     imageCaption.thread_init()
 
 def init_sensor(landing_distance):
-    sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance)
-    sensorReader.thread_init()
+    #sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance)
+    #sensorReader.thread_init()
     print("hilo de sensor")
 
 if __name__ == '__main__':
