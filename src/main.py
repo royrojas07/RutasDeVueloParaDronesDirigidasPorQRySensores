@@ -9,8 +9,8 @@ from ImageCaption import *
 from Sensor_reader import *
 from Log import *
 
-#dron = Tello()
-#dron.connect()
+dron = Tello()
+dron.connect()
 exit_event = threading.Event()
 cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
@@ -29,7 +29,7 @@ def handler(signum, frame):
 
 def main():
     route_type = usage()
-    if(route_type == 1):
+    if(route_type == 1): #ruta QR
         landing_distance = input("A cuanta distancia en metros está el punto de aterrizaje en frente del sensor ultrasónico?")
         threads = [Thread( target=init_Controller, args=()),
                 Thread( target=init_camera, args=()),
@@ -51,6 +51,7 @@ def usage():
         if not (sys.argv[2].isnumeric()):
             print("Error - Invalid input in the number argument")
             print("input must be a number")
+            log.print("ERROR","Main","Invalid input in the number argument")
             exit
         elif(sys.argv[1] == "QR"):
             max_height = int(sys.argv[2])
@@ -61,12 +62,14 @@ def usage():
         else:
             print("Error - Invalid input in the route type argument")
             print("route type could be: QR or auto")
+            log.print("ERROR","Main","Invalid input in the route type argument")
             exit
     else:
         print("Error - Invalid input in the arguments")
         print('Example: python main.py "route type" "number"')
-        print("route type could be: QR or auto")
+        print("route type could be: QR or auto")Invalid input in the route type argument
         print("number is max height in QR and which route in auto")
+        log.print("ERROR","Main","Invalid input arguments")
         exit
     return route_type
 

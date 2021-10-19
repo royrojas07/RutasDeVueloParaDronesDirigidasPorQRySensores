@@ -1,5 +1,6 @@
 from threading import Thread
 from time import sleep
+#from playsound import playsound 
 
 class Controller:
     def __init__(self,dron,cam_con_queue,sen_con_queue,log):
@@ -45,15 +46,18 @@ class Controller:
             print("[INFO] Controller: Message taken from ImageCaption")
             self.log.print("INFO","Controller", "Message taken from ImageCaption")
             self.send_commands(instruction)
+            #playsound('sonido de notificacion pikachu.mp3')  para prueba con sonido
             self.cam_con_queue.put("Next")
             self.log.print("INFO","Controller", "Requesting for the next instruction")
             sleep(1)
         #instruction = self.sen_con_queue.get()
         #send_commands(instruction)
-        #self.process_sen(self)
-        self.dron.land()
+        self.process_sen(self)
+        #self.dron.land()
 
     def process_sen(self):
+        self.sen_con_queue.put("Start")
+        sleep(1)
         while not self.land:
             print("[INFO] Controller: Waiting for message from SensorReader")
             instruction = self.sen_con_queue.get()
@@ -61,14 +65,15 @@ class Controller:
             self.send_commands_sen(instruction)
             self.sen_con_queue.put("Next")
             sleep(1)
+        self.dron.land()
 
     def send_commands_sen(self,instruction):
         print("[INFO] Controller: Executing Sensor_reader" + instruction)
         if(instruction == "LAND"):
-            land = True
+            self.land = True
         else:
             actions = instruction.split('')
-            if(actions[0] == "SENSOR ERROR"):
+            if(actions[0] == "SENSOR" and actions[1] == "ERROR"):
                 print(actions[1])
             else:
                 print(actions)
