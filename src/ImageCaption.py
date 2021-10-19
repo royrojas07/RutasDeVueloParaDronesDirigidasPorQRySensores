@@ -66,6 +66,7 @@ class ImageCaption:
             if( decoded_instruction == None ):
                 decoded_instruction = self.look_down( frame_reader )
         self.tello.streamoff()
+        self.tello.frame_reader.stop()
         return decoded_instruction
 
     def look_up( self, frame_reader ):
@@ -90,6 +91,7 @@ class ImageCaption:
                 sleep(1)
             # se actualiza altura actual
             curr_height = self.tello.get_height()
+            sleep(1)
         return decoded_instruction
     
     def look_down( self, frame_reader ):
@@ -114,6 +116,7 @@ class ImageCaption:
                 sleep(1)
             # se actualiza altura actual
             curr_height = self.tello.get_height()
+            sleep(1)
         return decoded_instruction
 
     def check_instruction( self, instruction ):
