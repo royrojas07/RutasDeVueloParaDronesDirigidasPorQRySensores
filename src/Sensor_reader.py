@@ -12,6 +12,7 @@ class Sensor_reader:
     def __init__(self,sen_con_queue,landing_distance):
         self.sen_con_queue = sen_con_queue
         self.landing_distance = landing_distance
+        self.src_thread = Thread( target=self.routine, args=() )
 
     def thread_init(self):
         self.src_thread.start()
