@@ -2,6 +2,7 @@ from grovepi import *
 import grovepi
 import time
 import numpy as np
+from threading import Thread
 
 ULTRASONIC_RANGER = 8
 SOUND_SENSOR = 0
@@ -9,10 +10,11 @@ ULTRASONIC_RANGER_LED = 4
 SOUND_SENSOR_LED = 3
 
 class Sensor_reader:
-    def __init__(self,sen_con_queue,landing_distance):
+    def __init__(self,sen_con_queue,landing_distance,log):
         self.sen_con_queue = sen_con_queue
         self.landing_distance = landing_distance
         self.src_thread = Thread( target=self.routine, args=() )
+        self.log = log
 
     def thread_init(self):
         self.src_thread.start()
@@ -35,9 +37,11 @@ class Sensor_reader:
         exit_thread = False
         land = False
         while not exit_thread and not land:
-            print("[INFO] SensorReader: Waiting message from Controller")
+            print("[INFO] SensorReader: Waiting for message from Controller")
+            self.log.print("INFO","SensorReader","Waiting for message from Controller")
             self.sen_con_queue.get()
             print("[INFO] SensorReader: Message received from Controller")
+            self.log.print("INFO","SensorReader","Message received from Controller")
             self.start() #se trata de detectar el dron y cuando se detecta se guia
             self.guide_drone()
             self.land_drone() #falta implementar metodo
