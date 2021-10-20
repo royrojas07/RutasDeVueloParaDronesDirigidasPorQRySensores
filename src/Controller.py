@@ -23,7 +23,8 @@ class Controller:
         self.log.print("INFO","Controller","Executing " + QRcode)
         if(QRcode == "END"):
             self.last_QR = True 
-            self.sen_con_queue.put("Wake up")
+            #self.sen_con_queue.put("Wake up")
+            print("LLEGO CON EXITOS EL END")
         else:
             actions = QRcode.split(',')
             print(actions)
@@ -46,14 +47,14 @@ class Controller:
             print("[INFO] Controller: Message taken from ImageCaption")
             self.log.print("INFO","Controller", "Message taken from ImageCaption")
             self.send_commands(instruction)
-            #playsound('sonido de notificacion pikachu.mp3')  para prueba con sonido
+            #playsound('sonido de notificacion pikachu.mp3')  #para prueba con sonido
             self.cam_con_queue.put("Next")
             self.log.print("INFO","Controller", "Requesting for the next instruction")
             sleep(1)
         #instruction = self.sen_con_queue.get()
         #send_commands(instruction)
-        self.process_sen(self)
-        #self.dron.land()
+        #self.process_sen(self)
+        self.dron.land()
 
     def process_sen(self):
         self.sen_con_queue.put("Start")
