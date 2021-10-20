@@ -67,7 +67,7 @@ def usage():
     else:
         print("Error - Invalid input in the arguments")
         print('Example: python main.py "route type" "number"')
-        print("route type could be: QR or auto")Invalid input in the route type argument
+        print("route type could be: QR or auto Invalid input in the route type argument")
         print("number is max height in QR and which route in auto")
         log.print("ERROR","Main","Invalid input arguments")
         exit
