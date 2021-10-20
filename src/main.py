@@ -77,7 +77,7 @@ def init_Controller():
     controller = Controller(dron,cam_con_queue,sen_con_queue,log)
     controller.thread_init()
 
-def init_camera():
+def init_camera(max_height):
     imageCaption = ImageCaption(dron,cam_con_queue,max_height,log)
     imageCaption.thread_init()
 
