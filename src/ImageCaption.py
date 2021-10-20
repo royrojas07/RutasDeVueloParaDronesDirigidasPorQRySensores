@@ -65,8 +65,8 @@ class ImageCaption:
             decoded_instruction = self.look_up( frame_reader )
             if( decoded_instruction == None ):
                 decoded_instruction = self.look_down( frame_reader )
-        self.tello.streamoff()
-        self.tello.frame_reader.stop()
+        #self.tello.streamoff()
+        #self.tello.frame_reader.stop()
         return decoded_instruction
 
     def look_up( self, frame_reader ):
