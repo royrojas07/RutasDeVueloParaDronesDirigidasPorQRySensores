@@ -20,24 +20,29 @@ class ImageCaption:
         self.src_thread.start()
     
     def routine( self ):
-        exit_thread = False
         end = False
-        no_qr_found = False
-        while not exit_thread and not end:
+        while not end:
+            qr_found = False
             print("[INFO] ImageCaption: Waiting message from Controller")
             self.log.print("INFO","ImageCaption","Waiting message from Controller")
             # espera pasiva de mensaje de controlador
             self.controller_comm.get()
             print("[INFO] ImageCaption: Message taken from Controller")
-            self.log.print("INFO","ImageCaption","Waiting taken from Controller")
-            while not no_qr_found:
+            self.log.print("INFO","ImageCaption","Message taken from Controller")
+            retries = 0
+            while not qr_found and retries < 2:
                 instruction = self.search_qr()
                 value = self.check_instruction( instruction )
-                if( value == 1 ):
+                print(str(value))
+                print(instruction)
+                if value == 1:
                     self.controller_comm.put( instruction )
-                else:
+                    qr_found = True
+                elif value == 2:
                     self.controller_comm.put( instruction.split( ",END" )[0] )
                     end = True
+                    qr_found = True
+                retries = retries + 1 # como limite temporal para pruebas
             sleep(1) # para esperar a que el controlador agarre el mensaje primero
         self.controller_comm.get() # esperar a que se completen las ultimas acciones antes del END
         self.controller_comm.put( "END" )
@@ -49,9 +54,6 @@ class ImageCaption:
         # se toma la foto
         frame_reader = self.tello.get_frame_read()
         img = frame_reader.frame
-        now = datetime.now()
-        current_time = now.strftime("%H:%M:%S")
-        cv2.imwrite("picture " + current_time + ".jpg", img)
         # decode qr image
         dec_img = decode( img )
         if( len(dec_img) != 0 ):
@@ -63,7 +65,8 @@ class ImageCaption:
             decoded_instruction = self.look_up( frame_reader )
             if( decoded_instruction == None ):
                 decoded_instruction = self.look_down( frame_reader )
-        self.tello.streamoff()
+        #self.tello.streamoff()
+        #self.tello.frame_reader.stop()
         return decoded_instruction
 
     def look_up( self, frame_reader ):
@@ -79,17 +82,16 @@ class ImageCaption:
             # se busca QR mientras el dron se mueve
             while t.is_alive():
                 img = frame_reader.frame
-                now = datetime.now()
-                current_time = now.strftime("%H:%M:%S")
-                cv2.imwrite("picture " + current_time + ".jpg", img)
                 dec_img = decode( img )
                 if( len(dec_img) != 0 ):
                     decoded_instruction = dec_img[0].data.decode( 'utf8' )
                     print("[INFO] ImageCaption: QR found when looking up")
                     self.log.print("INFO","ImageCaption","QR found when looking up")
                     break
+                sleep(1)
             # se actualiza altura actual
             curr_height = self.tello.get_height()
+            sleep(1)
         return decoded_instruction
     
     def look_down( self, frame_reader ):
@@ -105,29 +107,28 @@ class ImageCaption:
             # se busca QR mientras el dron se mueve
             while t.is_alive():
                 img = frame_reader.frame
-                now = datetime.now()
-                current_time = now.strftime("%H:%M:%S")
-                cv2.imwrite("picture " + current_time + ".jpg", img)
                 dec_img = decode( img )
                 if( len(dec_img) != 0 ):
                     decoded_instruction = dec_img[0].data.decode( 'utf8' )
                     print("[INFO] ImageCaption: QR found when looking down")
                     self.log.print("INFO","ImageCaption","QR found when looking down")
                     break
+                sleep(1)
             # se actualiza altura actual
             curr_height = self.tello.get_height()
+            sleep(1)
         return decoded_instruction
 
     def check_instruction( self, instruction ):
         if( instruction == None ):
             return 0
-        elif( re.search( "^((([RLFUB]|R(R|L)):[2-9]\d+,)+(([RLFUB]|R(R|L)):[2-9]\d+))$",
+        elif( re.search( "^((([RLFUB]|R(R|L)):\d+,)+(([RLFUB]|R(R|L)):\d+))$",
             instruction ) ):
                 return 1
-        elif( re.search( "^(([RLFUB]|R(R|L)):[2-9]\d+)$",
+        elif( re.search( "^(([RLFUB]|R(R|L)):\d+)$",
             instruction ) ):
                 return 1
-        elif( re.search( "^((([RLFUB]|R(R|L)):[2-9]\d+,)+END)$",
+        elif( re.search( "^((([RLFUB]|R(R|L)):\d+,)+END)$",
             instruction ) ):
                 return 2
         return 0
