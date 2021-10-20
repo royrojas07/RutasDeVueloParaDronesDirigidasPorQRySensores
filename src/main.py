@@ -28,12 +28,11 @@ def handler(signum, frame):
 
 
 def main():
-    route_type = usage()
+    route_type, max_height = usage()
     if(route_type == 1): #ruta QR
-        landing_distance = input("A cuanta distancia en metros está el punto de aterrizaje en frente del sensor ultrasónico?")
         threads = [Thread( target=init_Controller, args=()),
-                Thread( target=init_camera, args=()),
-                Thread( target=init_sensor, args=(landing_distance))]
+                Thread( target=init_camera, args=(max_height,)),
+                Thread( target=init_sensor, args=())]
 
         for thread in threads:
             thread.start()
@@ -67,21 +66,21 @@ def usage():
     else:
         print("Error - Invalid input in the arguments")
         print('Example: python main.py "route type" "number"')
-        print("route type could be: QR or auto")Invalid input in the route type argument
+        print("route type could be: QR or auto Invalid input in the route type argument")
         print("number is max height in QR and which route in auto")
         log.print("ERROR","Main","Invalid input arguments")
         exit
-    return route_type
+    return route_type, max_height
 
 def init_Controller():
     controller = Controller(dron,cam_con_queue,sen_con_queue,log)
     controller.thread_init()
 
-def init_camera():
+def init_camera(max_height):
     imageCaption = ImageCaption(dron,cam_con_queue,max_height,log)
     imageCaption.thread_init()
 
-def init_sensor(landing_distance):
+def init_sensor():
     sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance)
     sensorReader.thread_init()
     print("hilo de sensor")
