@@ -30,10 +30,9 @@ def handler(signum, frame):
 def main():
     route_type, max_height = usage()
     if(route_type == 1): #ruta QR
-        landing_distance = input("A cuanta distancia en metros está el punto de aterrizaje en frente del sensor ultrasónico?")
         threads = [Thread( target=init_Controller, args=()),
                 Thread( target=init_camera, args=(max_height,)),
-                Thread( target=init_sensor, args=(landing_distance,))]
+                Thread( target=init_sensor, args=())]
 
         for thread in threads:
             thread.start()
@@ -81,7 +80,7 @@ def init_camera(max_height):
     imageCaption = ImageCaption(dron,cam_con_queue,max_height,log)
     imageCaption.thread_init()
 
-def init_sensor(landing_distance):
+def init_sensor():
     sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance)
     sensorReader.thread_init()
     print("hilo de sensor")
