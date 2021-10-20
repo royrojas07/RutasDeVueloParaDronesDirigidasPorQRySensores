@@ -28,12 +28,12 @@ def handler(signum, frame):
 
 
 def main():
-    route_type = usage()
+    route_type, max_height = usage()
     if(route_type == 1): #ruta QR
         landing_distance = input("A cuanta distancia en metros está el punto de aterrizaje en frente del sensor ultrasónico?")
         threads = [Thread( target=init_Controller, args=()),
-                Thread( target=init_camera, args=()),
-                Thread( target=init_sensor, args=(landing_distance))]
+                Thread( target=init_camera, args=(max_height,)),
+                Thread( target=init_sensor, args=(landing_distance,))]
 
         for thread in threads:
             thread.start()
@@ -71,7 +71,7 @@ def usage():
         print("number is max height in QR and which route in auto")
         log.print("ERROR","Main","Invalid input arguments")
         exit
-    return route_type
+    return route_type, max_height
 
 def init_Controller():
     controller = Controller(dron,cam_con_queue,sen_con_queue,log)
