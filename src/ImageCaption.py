@@ -77,18 +77,14 @@ class ImageCaption:
         while( self.max_height - curr_height > 40 and decoded_instruction == None ):
             print("[INFO] ImageCaption: current height: " + str(curr_height))
             self.log.print("INFO","ImageCaption","current height: "+str(curr_height))
-            t = Thread( target=self.move, args=(1, 20) )
-            t.start()
-            # se busca QR mientras el dron se mueve
-            while t.is_alive():
-                img = frame_reader.frame
-                dec_img = decode( img )
-                if( len(dec_img) != 0 ):
-                    decoded_instruction = dec_img[0].data.decode( 'utf8' )
-                    print("[INFO] ImageCaption: QR found when looking up")
-                    self.log.print("INFO","ImageCaption","QR found when looking up")
-                    break
-                sleep(1)
+            self.tello.move_up( 20 )
+            img = frame_reader.frame
+            dec_img = decode( img )
+            if( len(dec_img) != 0 ):
+                decoded_instruction = dec_img[0].data.decode( 'utf8' )
+                print("[INFO] ImageCaption: QR found when looking up")
+                self.log.print("INFO","ImageCaption","QR found when looking up")
+                break
             # se actualiza altura actual
             curr_height = self.tello.get_height()
             sleep(1)
@@ -102,18 +98,14 @@ class ImageCaption:
         while( curr_height > 30 and decoded_instruction == None ): # reconsiderar 30
             print("[INFO] ImageCaption: current height: " + str(curr_height))
             self.log.print("INFO","ImageCaption","current height: "+str(curr_height))
-            t = Thread( target=self.move, args=(0, 20) )
-            t.start()
-            # se busca QR mientras el dron se mueve
-            while t.is_alive():
-                img = frame_reader.frame
-                dec_img = decode( img )
-                if( len(dec_img) != 0 ):
-                    decoded_instruction = dec_img[0].data.decode( 'utf8' )
-                    print("[INFO] ImageCaption: QR found when looking down")
-                    self.log.print("INFO","ImageCaption","QR found when looking down")
-                    break
-                sleep(1)
+            self.tello.move_down( 20 )
+            img = frame_reader.frame
+            dec_img = decode( img )
+            if( len(dec_img) != 0 ):
+                decoded_instruction = dec_img[0].data.decode( 'utf8' )
+                print("[INFO] ImageCaption: QR found when looking down")
+                self.log.print("INFO","ImageCaption","QR found when looking down")
+                break
             # se actualiza altura actual
             curr_height = self.tello.get_height()
             sleep(1)
@@ -132,9 +124,3 @@ class ImageCaption:
             instruction ) ):
                 return 2
         return 0
-    
-    def move( self, direction, cm ):
-        if direction == 1:
-            self.tello.move_up( cm )
-        else:
-            self.tello.move_down( cm )
