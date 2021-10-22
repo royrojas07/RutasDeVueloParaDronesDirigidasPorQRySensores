@@ -29,12 +29,12 @@ class ImageCaption:
             self.controller_comm.get()
             print("[INFO] ImageCaption: Message taken from Controller")
             self.log.print("INFO","ImageCaption","Message taken from Controller")
+            # inicia toma de video
+            self.tello.streamon()
             retries = 0
             while not qr_found and retries < 2:
                 instruction = self.search_qr()
                 value = self.check_instruction( instruction )
-                print(str(value))
-                print(instruction)
                 if value == 1:
                     self.controller_comm.put( instruction )
                     qr_found = True
@@ -49,24 +49,26 @@ class ImageCaption:
     
     def search_qr( self ):
         decoded_instruction = None
-        # inicia toma de video
-        self.tello.streamon()
         # se toma la foto
         frame_reader = self.tello.get_frame_read()
         img = frame_reader.frame
+
+        #now = datetime.now()
+        #current_time = now.strftime("%H:%M:%S")
+        #cv2.imwrite("picture " + current_time + ".jpg", img)
+
         # decode qr image
         dec_img = decode( img )
         if( len(dec_img) != 0 ):
             decoded_instruction = dec_img[0].data.decode( 'utf8' )
             print("[INFO] ImageCaption: QR found in front")
             self.log.print("INFO","ImageCaption","QR found in front")
+            print( decoded_instruction )
         else:
             # inicia rutina de búsqueda
             decoded_instruction = self.look_up( frame_reader )
             if( decoded_instruction == None ):
                 decoded_instruction = self.look_down( frame_reader )
-        #self.tello.streamoff()
-        #self.tello.frame_reader.stop()
         return decoded_instruction
 
     def look_up( self, frame_reader ):
@@ -79,11 +81,17 @@ class ImageCaption:
             self.log.print("INFO","ImageCaption","current height: "+str(curr_height))
             self.tello.move_up( 20 )
             img = frame_reader.frame
+
+            #now = datetime.now()
+            #current_time = now.strftime("%H:%M:%S")
+            #cv2.imwrite("picture " + current_time + ".jpg", img)
+
             dec_img = decode( img )
             if( len(dec_img) != 0 ):
                 decoded_instruction = dec_img[0].data.decode( 'utf8' )
                 print("[INFO] ImageCaption: QR found when looking up")
                 self.log.print("INFO","ImageCaption","QR found when looking up")
+                print( decoded_instruction )
                 break
             # se actualiza altura actual
             curr_height = self.tello.get_height()
@@ -100,11 +108,17 @@ class ImageCaption:
             self.log.print("INFO","ImageCaption","current height: "+str(curr_height))
             self.tello.move_down( 20 )
             img = frame_reader.frame
+
+            #now = datetime.now()
+            #current_time = now.strftime("%H:%M:%S")
+            #cv2.imwrite("picture " + current_time + ".jpg", img)
+            
             dec_img = decode( img )
             if( len(dec_img) != 0 ):
                 decoded_instruction = dec_img[0].data.decode( 'utf8' )
                 print("[INFO] ImageCaption: QR found when looking down")
                 self.log.print("INFO","ImageCaption","QR found when looking down")
+                print( decoded_instruction )
                 break
             # se actualiza altura actual
             curr_height = self.tello.get_height()
