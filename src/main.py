@@ -15,9 +15,10 @@ exit_event = threading.Event()
 cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
 
-#print( dron.get_battery() )
 log = Log()
 log.print("INFO","Main","The program started")
+log.print("INFO","Main","Tello battery: "+str(dron.get_battery()))
+print("[INFO] Main: Tello battery level: "+str(dron.get_battery()))
 
 def handler(signum, frame):
     print("[ABORT] Landing the Tello")
@@ -103,4 +104,7 @@ def init_sensor():
     print("hilo de sensor")
 
 if __name__ == '__main__':
-	main()
+    if dron.get_battery() > 10:
+        main()
+    else:
+        print("Battery is low: "+str(dron.get_battery())+"%")
