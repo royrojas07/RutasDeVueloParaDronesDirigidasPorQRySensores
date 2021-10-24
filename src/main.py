@@ -6,7 +6,7 @@ import sys
 import signal
 from Controller import *
 from ImageCaption import *
-#from Sensor_reader import *
+from Sensor_reader import *
 from Log import *
 
 dron = Tello()
@@ -29,7 +29,7 @@ def handler(signum, frame):
 
 
 def main():
-    route_type, max_height, landing_distance = usage()
+    route_type, max_height, landing_distance, sensor_height = usage()
     if(route_type == 1): #ruta QR
         threads = [Thread( target=init_Controller, args=()),
                 Thread( target=init_camera, args=(max_height,))]
@@ -43,7 +43,7 @@ def main():
     else:#en este caso se usarian los sensores 
         threads = [Thread( target=init_Controller, args=()),
                 Thread( target=init_camera, args=(max_height,)),
-                Thread( target = init_sensor, args=(max_height,))]
+                Thread( target = init_sensor, args=(landing_distance,max_height,sensor_height,))]
         for thread in threads:
             thread.start()
             thread.join()
@@ -54,6 +54,7 @@ def usage():
     route_type = 0
     max_height = 0
     landing_distance = 0
+    sensor_height = 0
     if len(sys.argv) == 3:
         if not (sys.argv[2].isnumeric()):
             print("Error - Invalid input in the number argument")
@@ -71,8 +72,8 @@ def usage():
             print("route type could be: QR or auto")
             log.print("ERROR","Main","Invalid input in the route type argument")
             exit
-    elif len(sys.argv) == 4:
-        if not (sys.argv[2].isnumeric() and sys.argv[3].isnumeric()):
+    elif len(sys.argv) == 5:
+        if not (sys.argv[2].isnumeric() and sys.argv[3].isnumeric() and sys.argv[4].isnumeric()):
             print("Error - Invalid input in the number argument")
             print("input must be a number")
             log.print("ERROR","Main","Invalid input in the number argument")
@@ -80,6 +81,7 @@ def usage():
         elif(sys.argv[1] == "QRsen"):
             max_height = int(sys.argv[2])
             landing_distance = int(sys.argv[3])
+            sensor_height = int(sys.argv[4])
             route_type = 3
     else:
         print("Error - Invalid input in the arguments")
@@ -88,7 +90,7 @@ def usage():
         print("number is max height in QR and which route in auto")
         log.print("ERROR","Main","Invalid input arguments")
         exit
-    return route_type, max_height, landing_distance
+    return route_type, max_height, landing_distance, sensor_height
 
 def init_Controller():
     controller = Controller(dron,cam_con_queue,sen_con_queue,log)
@@ -98,8 +100,8 @@ def init_camera(max_height):
     imageCaption = ImageCaption(dron,cam_con_queue,max_height,log)
     imageCaption.thread_init()
 
-def init_sensor():
-    sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance)
+def init_sensor(landing_distance,max_height,sensor_height):
+    sensorReader = Sensor_reader(dron,sen_con_queue,landing_distance,max_height,sensor_height,log)
     sensorReader.thread_init()
     print("hilo de sensor")
 
