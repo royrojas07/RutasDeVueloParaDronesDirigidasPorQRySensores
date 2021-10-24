@@ -10,9 +10,11 @@ ULTRASONIC_RANGER_LED = 4
 SOUND_SENSOR_LED = 3
 
 class Sensor_reader:
-    def __init__(self,sen_con_queue,landing_distance,log):
+    def __init__(self,dron,sen_con_queue,landing_distance,max_height,sensor_height,log):
+        self.dron = dron
         self.sen_con_queue = sen_con_queue
         self.landing_distance = landing_distance
+        self.sensor_height = sensor_height
         self.src_thread = Thread( target=self.routine, args=() )
         self.log = log
 
@@ -32,6 +34,30 @@ class Sensor_reader:
             self.send_command("F:" + distance_forward)
         else:
             self.send_command("SENSOR ERROR")
+
+    def land_drone():
+        self.dron.land()
+    
+    def lookforsensors():
+        drone_height = self.dron.get_height()
+        if(drone_height > self.sensor_height):
+            distance = drone_height - self.sensor_height
+            if(distance >= 20):
+                self.send_command("D:"+distance)
+            else:
+                temp = 20+distance
+                if(drone_height + 20 <= self.max_height ):
+                    self.send_command("U:20")
+                    self.send_command("D:"+temp)
+        elif(drone_height < self.sensor_height):
+            distance = self.sensor_height - drone_height 
+            if(distance >= 20):
+                self.send_command("U:"+distance)
+            else:
+                temp = 20+distance
+                if(drone_height - 20 > 0):
+                    self.send_command("D:20")
+                    self.send_command("U:"+temp)
 
     def routine(self):
         exit_thread = False
@@ -56,15 +82,15 @@ class Sensor_reader:
                 loudness = analogRead(SOUND_SENSOR)
                 print(distance,' cm')
                 print("loudness = ", loudness)
-                if distance <= 20 and loudness >= 150:
+                if distance <= 30 and loudness >= 150:
                     digitalWrite(ULTRASONIC_RANGER_LED,1)
                     digitalWrite(SOUND_SENSOR_LED,1)
                     ultrasonic_detected = True
                     sound_detected = True
-                elif distance <= 20 and loudness < 150:
+                elif distance <= 30 and loudness < 150:
                     digitalWrite(ULTRASONIC_RANGER_LED,1)
                     digitalWrite(SOUND_SENSOR_LED,0)
-                elif distance >20 and loudness >= 150:
+                elif distance >30 and loudness >= 150:
                     digitalWrite(ULTRASONIC_RANGER_LED,0)
                     digitalWrite(SOUND_SENSOR_LED,1)
                 else: 
@@ -76,4 +102,7 @@ class Sensor_reader:
             if(ultrasonic_detected and sound_detected):
                 print("Drone detected")
                 drone_not_detected = False
+            else:
+                lookforsensors()
+
 
