@@ -10,6 +10,7 @@ class Log:
         now = datetime.now()
         current_time = now.strftime("%H:%M:%S")
         self.file.write(current_time + ' [' + msg_type + "] " + module_name + ": "+ msg + "\n")
+        self.file.flush() #Refresca la bitacora en tiempo real
     
     def close_file(self):
         self.file.close()
