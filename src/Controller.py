@@ -54,6 +54,8 @@ class Controller:
         #instruction = self.sen_con_queue.get()
         #send_commands(instruction)
         #self.process_sen(self)
+        self.log.print("INFO","Controller", "Program ended, landing...")
+        self.log.close_file()
         self.dron.land()
 
     def process_sen(self):
