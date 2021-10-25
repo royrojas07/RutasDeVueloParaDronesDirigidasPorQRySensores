@@ -37,7 +37,7 @@ class Sensor_reader:
             self.send_command("SENSOR ERROR")
 
     def land_drone(self):
-        self.dron.land()
+        self.send_command("LAND")
     
     def lookforsensors(self):
         drone_height = self.dron.get_height()
