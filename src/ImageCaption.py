@@ -32,7 +32,7 @@ class ImageCaption:
             # inicia toma de video
             self.tello.streamon()
             retries = 0
-            while not qr_found and retries < 2:
+            while not qr_found:
                 instruction = self.search_qr()
                 value = self.check_instruction( instruction )
                 if value == 1:
@@ -42,8 +42,14 @@ class ImageCaption:
                     self.controller_comm.put( instruction.split( ",END" )[0] )
                     end = True
                     qr_found = True
-                retries = retries + 1 # como limite temporal para pruebas
+                if retries < 2:
+                    retries = retries + 1 # como limite temporal para pruebas
+                else:
+                    break
             sleep(1) # para esperar a que el controlador agarre el mensaje primero
+        if not end:
+            print("[INFO] ImageCaption: No QR found")
+            self.log.print("INFO","ImageCaption","No QR found")
         self.controller_comm.get() # esperar a que se completen las ultimas acciones antes del END
         self.controller_comm.put( "END" )
     
@@ -61,9 +67,9 @@ class ImageCaption:
         dec_img = decode( img )
         if( len(dec_img) != 0 ):
             decoded_instruction = dec_img[0].data.decode( 'utf8' )
-            print("[INFO] ImageCaption: QR found in front")
-            self.log.print("INFO","ImageCaption","QR found in front")
-            print( decoded_instruction )
+            if self.check_instruction( decoded_instruction ):
+                print("[INFO] ImageCaption: QR found in front")
+                self.log.print("INFO","ImageCaption","QR found in front")
         else:
             # inicia rutina de búsqueda
             decoded_instruction = self.look_up( frame_reader )
@@ -89,10 +95,10 @@ class ImageCaption:
             dec_img = decode( img )
             if( len(dec_img) != 0 ):
                 decoded_instruction = dec_img[0].data.decode( 'utf8' )
-                print("[INFO] ImageCaption: QR found when looking up")
-                self.log.print("INFO","ImageCaption","QR found when looking up")
-                print( decoded_instruction )
-                break
+                if self.check_instruction( decoded_instruction ):
+                    print("[INFO] ImageCaption: QR found when looking up")
+                    self.log.print("INFO","ImageCaption","QR found when looking up")
+                    break
             # se actualiza altura actual
             curr_height = self.tello.get_height()
             sleep(1)
@@ -116,10 +122,10 @@ class ImageCaption:
             dec_img = decode( img )
             if( len(dec_img) != 0 ):
                 decoded_instruction = dec_img[0].data.decode( 'utf8' )
-                print("[INFO] ImageCaption: QR found when looking down")
-                self.log.print("INFO","ImageCaption","QR found when looking down")
-                print( decoded_instruction )
-                break
+                if self.check_instruction( decoded_instruction ):
+                    print("[INFO] ImageCaption: QR found when looking down")
+                    self.log.print("INFO","ImageCaption","QR found when looking down")
+                    break
             # se actualiza altura actual
             curr_height = self.tello.get_height()
             sleep(1)
