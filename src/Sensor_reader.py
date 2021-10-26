@@ -23,19 +23,20 @@ class Sensor_reader:
         self.src_thread.start()
     
     def send_command(self, command):
+        self.sen_con_queue.get()
         self.sen_con_queue.put(command)
     
-    def guide_drone(self):
-        distances = []
-        for i in range(6):
-            distances.append(ultrasonicRead(ULTRASONIC_RANGER))
-        mean_distance = np.mean(distances)
-        if(distance <= self.landing_distance and self.sen_con_queue.get() == "END" or self.sen_con_queue.get() == "NEXT"):
-            distance_forward = self.landing_distance - mean_distance
-            self.send_command("F:" + distance_forward)
-        else:
-            self.send_command("SENSOR ERROR")
-
+    def guide_drone(self,drone_distance):
+        if(drone_distance <= self.landing_distance):
+            distance_forward = self.landing_distance - drone_distance
+            print("se manda instruccion para que vaya para adelante " + str(distance_forward))
+            #self.send_command("F:" + str(distance_forward))
+            self.dron.move_forward(distance_forward)
+            print("va a aterrizar")
+        elif(drone_distance > self.landing):
+            distance_backward = drone_distance - self.landing_distance
+            self.dron.move_backward(distance_backward)
+    
     def land_drone(self):
         self.send_command("LAND")
     
@@ -44,39 +45,46 @@ class Sensor_reader:
         if(drone_height > self.sensor_height):
             distance = drone_height - self.sensor_height
             if(distance >= 20):
-                self.send_command("D:"+distance)
+                #self.send_command("D:"+str(distance))
+                self.dron.move_down(distance)
             else:
                 temp = 20+distance
                 if(drone_height + 20 <= self.max_height ):
-                    self.send_command("U:20")
-                    self.send_command("D:"+temp)
+                    #self.send_command("U:20")
+                    #self.send_command("D:"+str(temp))
+                    self.dron.move_up(20)
+                    self.dron.move_down(temp)
         elif(drone_height < self.sensor_height):
             distance = self.sensor_height - drone_height 
             if(distance >= 20):
-                self.send_command("U:"+distance)
+                #self.send_command("U:"+str(distance))
+                self.dron.move_up(distance)
             else:
                 temp = 20+distance
                 if(drone_height - 20 > 0):
-                    self.send_command("D:20")
-                    self.send_command("U:"+temp)
+                    self.dron.move_down(20)
+                    self.dron.move_up(temp)
+                    #self.send_command("D:20")
+                    #self.send_command("U:"+str(temp))
 
     def routine(self):
-        exit_thread = False
-        land = False
-        while not exit_thread and not land:
-            print("[INFO] SensorReader: Waiting for message from Controller")
-            self.log.print("INFO","SensorReader","Waiting for message from Controller")
-            self.sen_con_queue.get()
-            print("[INFO] SensorReader: Message received from Controller")
-            self.log.print("INFO","SensorReader","Message received from Controller")
-            self.start() #se trata de detectar el dron y cuando se detecta se guia
-            self.guide_drone()
-            self.land_drone() #falta implementar metodo
+        print("[INFO] SensorReader: Waiting for message from Controller")
+        self.log.print("INFO","SensorReader","Waiting for message from Controller")
+        self.sen_con_queue.get()
+        print("[INFO] SensorReader: Message received from Controller")
+        self.log.print("INFO","SensorReader","Message received from Controller")
+        self.sen_con_queue.put("LOOKING")
+        print("[INFO] SensorReader: Sensors looking for drone")
+        self.log.print("INFO","SensorReader","Sensors looking for drone")
+        drone_distance = self.start() #se trata de detectar el dron y cuando se detecta se guia
+        self.guide_drone(drone_distance) #se guia el dron hacia el punto de aterrizaje
+        self.land_drone() #se aterriza el dron
     
     def start(self):
         ultrasonic_detected = False
         sound_detected = False
         drone_not_detected = True
+        drone_distance_from_sensor = 0
         while drone_not_detected:
             try:
                 distance = ultrasonicRead(ULTRASONIC_RANGER)
@@ -88,6 +96,7 @@ class Sensor_reader:
                     digitalWrite(SOUND_SENSOR_LED,1)
                     ultrasonic_detected = True
                     sound_detected = True
+                    dronoe_distance_from_sensor = distance
                 elif distance <= 100 and loudness < 150:
                     digitalWrite(ULTRASONIC_RANGER_LED,1)
                     digitalWrite(SOUND_SENSOR_LED,0)
@@ -99,10 +108,15 @@ class Sensor_reader:
                     digitalWrite(SOUND_SENSOR_LED,0)
                 time.sleep(.5)
             except IOError:
-                print("Error")
+                print("Sensor error")
+            except TypeError:
+                print("Sensor error") 
             if(ultrasonic_detected and sound_detected):
                 print("Drone detected")
                 drone_not_detected = False
+                digitalWrite(ULTRASONIC_RANGER_LED,0)
+                digitalWrite(SOUND_SENSOR_LED,0)
             else:
-                lookforsensors()
+                self.lookforsensors()
+        return drone_distance_from_sensor
 
