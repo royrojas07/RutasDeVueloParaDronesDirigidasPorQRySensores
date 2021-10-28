@@ -3,10 +3,12 @@ from time import sleep
 #from playsound import playsound 
 
 class Controller:
-    def __init__(self,dron,cam_con_queue,sen_con_queue,log):
+    def __init__(self,dron,cam_con_queue,sen_con_queue,log,cam_stop_queue):
         self.dron = dron
         self.cam_con_queue = cam_con_queue
         self.sen_con_queue = sen_con_queue
+        self.cam_stop_queue = cam_stop_queue
+
         self.last_QR = False
         self.land = False
         self.log = log
@@ -19,13 +21,24 @@ class Controller:
         self.src_thread.start()
 
     def send_commands(self,QRcode):
-        print("[INFO] Controller: Executing " + QRcode)
-        self.log.print("INFO","Controller","Executing " + QRcode)
         if(QRcode == "END"):
             self.last_QR = True 
             #self.sen_con_queue.put("Wake up")
             print("LLEGO CON EXITOS EL END")
+        elif(QRcode == "NOQR"):
+            self.log.print("ERROR","Controller", "Program ended, it doesn't found a QR, landing...")
+            self.log.close_file()
+            self.dron.land()
+            exit(1)
+        elif(QRcode == "STOP"):
+            self.log.print("INFO","Controller", "Program ended by a stop event, landing...")
+            self.log.close_file()
+            self.dron.land()
+            self.cam_stop_queue.put("Termine")
+            exit(0)
         else:
+            print("[INFO] Controller: Executing " + QRcode)
+            self.log.print("INFO","Controller","Executing " + QRcode)
             actions = QRcode.split(',')
             print(actions)
             for action in actions:

@@ -6,7 +6,7 @@ import sys
 import signal
 from Controller import *
 from ImageCaption import *
-from Sensor_reader import *
+#from Sensor_reader import *
 from Log import *
 
 dron = Tello()
@@ -14,6 +14,8 @@ dron.connect()
 exit_event = threading.Event()
 cam_con_queue = queue.Queue() #cola entre la camara y el controlador
 sen_con_queue = queue.Queue() #cola entre el sensor y el controlador
+cam_stop_queue = queue.Queue()
+sen_stop_queue = queue.Queue()
 
 log = Log()
 log.print("INFO","Main","The program started")
@@ -22,10 +24,12 @@ print("[INFO] Main: Tello battery level: "+str(dron.get_battery()))
 
 def handler(signum, frame):
     print("[ABORT] Landing the Tello")
-    dron.end() #dron.land() #funcionan parecido
-    exit_event.set() # para que mate los threads
-    log.close_file()
-    exit()
+    cam_stop_queue.put("STOP")
+    sleep(1)
+    cam_stop_queue.get() #para esperar que el controller termine
+    #dron.end() #dron.land() #funcionan parecido
+    #log.close_file()
+    #exit()
 
 
 def main():
@@ -93,11 +97,11 @@ def usage():
     return route_type, max_height, landing_distance, sensor_height
 
 def init_Controller():
-    controller = Controller(dron,cam_con_queue,sen_con_queue,log)
+    controller = Controller(dron,cam_con_queue,sen_con_queue,log,cam_stop_queue)
     controller.thread_init()
 
 def init_camera(max_height):
-    imageCaption = ImageCaption(dron,cam_con_queue,max_height,log)
+    imageCaption = ImageCaption(dron,cam_con_queue,max_height,log,cam_stop_queue)
     imageCaption.thread_init()
 
 def init_sensor(landing_distance,max_height,sensor_height):

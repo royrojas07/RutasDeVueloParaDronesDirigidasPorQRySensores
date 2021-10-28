@@ -7,11 +7,12 @@ import re
 from datetime import datetime
 
 class ImageCaption:
-    def __init__( self, tello, queue, max_height, log ):
+    def __init__( self, tello, queue, max_height, log, cam_stop_queue ):
         # tello instance
         self.tello = tello
         # Queue for communication
         self.controller_comm = queue
+        self.stop_queue = cam_stop_queue
         self.src_thread = Thread( target=self.routine, args=() )
         self.max_height = max_height
         self.log = log
@@ -33,6 +34,10 @@ class ImageCaption:
             self.tello.streamon()
             retries = 0
             while not qr_found:
+                if not (self.stop_queue.empty()):
+                    self.controller_comm.put("STOP")
+                    self.log.print("INFO","ImageCaption","Received a stop event")
+                    exit(0)
                 instruction = self.search_qr()
                 value = self.check_instruction( instruction )
                 if value == 1:
@@ -86,6 +91,10 @@ class ImageCaption:
             print("[INFO] ImageCaption: current height: " + str(curr_height))
             self.log.print("INFO","ImageCaption","current height: "+str(curr_height))
             self.tello.move_up( 20 )
+            if not(self.stop_queue.empty()):
+                self.controller_comm.put("STOP")
+                self.log.print("INFO","ImageCaption","Received a stop event")
+                exit(0)
             img = frame_reader.frame
 
             #now = datetime.now()
@@ -113,6 +122,10 @@ class ImageCaption:
             print("[INFO] ImageCaption: current height: " + str(curr_height))
             self.log.print("INFO","ImageCaption","current height: "+str(curr_height))
             self.tello.move_down( 20 )
+            if not(self.stop_queue.empty()):
+                self.controller_comm.put("STOP")
+                self.log.print("INFO","ImageCaption","Received a stop event")
+                exit(0)
             img = frame_reader.frame
 
             #now = datetime.now()
