@@ -26,7 +26,7 @@ def handler(signum, frame):
     print("[ABORT] Landing the Tello")
     cam_stop_queue.put("STOP")
     sleep(1)
-    cam_stop_queue.get() #para esperar que el controller termine
+    m = cam_stop_queue.get() #para esperar que el controller termine
     #dron.end() #dron.land() #funcionan parecido
     #log.close_file()
     #exit()
@@ -35,12 +35,15 @@ def handler(signum, frame):
 def main():
     route_type, max_height, landing_distance, sensor_height = usage()
     if(route_type == 1): #ruta QR
-        threads = [Thread( target=init_Controller, args=()),
-                Thread( target=init_camera, args=(max_height,))]
+        threads = [Thread(target=init_camera, args=(max_height,)),
+                    Thread(target=init_Controller, args=())]
 
         for thread in threads:
             thread.start()
+
+        for thread in threads:
             thread.join()
+
     elif(route_type == 2):
         pass
         #en este caso usaria el archivo separado por tabs
@@ -50,6 +53,7 @@ def main():
                 Thread( target = init_sensor, args=(landing_distance,max_height,sensor_height,))]
         for thread in threads:
             thread.start()
+        for thread in threads:
             thread.join()
     signal.signal(2, handler)
     #log.close_file()
